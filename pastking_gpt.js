@@ -233,7 +233,7 @@ function ChucklePostAI(AI_option) {
   }
 
   function runChucklePostAI() {
-    if (window.location.pathname.includes('posts')) {
+    if (isArticlePage()) {
       const mainContainer = findMainArticleContainer();
       if (mainContainer) {
         insertAIDiv('#' + mainContainer.id);
@@ -260,17 +260,23 @@ function ChucklePostAI(AI_option) {
   }
 
   // 初始化时检查URL
-  if (window.location.pathname.includes('posts')) {
+  if (isArticlePage()) {
     initChucklePostAI();
   }
 
   // 监听URL变化并自动刷新
-  let lastUrl = location.href; 
+  let lastUrl = location.href;
+
+  function isArticlePage() {
+    const pathsToCheck = ['posts', 'article'];
+    return pathsToCheck.some(path => window.location.pathname.includes(path))
+  }
+
   new MutationObserver(() => {
   const url = location.href;
     if (url !== lastUrl) {
       lastUrl = url;
-      if (window.location.pathname.includes('posts')) {
+      if (isArticlePage()) {
         location.reload(); // 页面刷新
       }
     }
