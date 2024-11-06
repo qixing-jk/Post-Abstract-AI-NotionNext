@@ -1,16 +1,16 @@
 console.log("\n %c Post-Abstract-AI-NotionNex 开源博客文章摘要AI生成工具 %c https://github.com/PastKing/Post-Abstract-AI-NotionNext \n", "color: #fadfa3; background: #030307; padding:5px 0;", "background: #fadfa3; padding:5px 0;");
 
 function ChucklePostAI(AI_option) {
-  var aiExecuted = false;
+    var aiExecuted = false;
 
-  function insertAIDiv(selector) {
-    removeExistingAIDiv();
-    const targetElement = document.querySelector(selector);
-    if (!targetElement) return;
+    function insertAIDiv(selector) {
+        removeExistingAIDiv();
+        const targetElement = document.querySelector(selector);
+        if (!targetElement) return;
 
-    const aiDiv = document.createElement('div');
-    aiDiv.className = 'post-ai';
-    aiDiv.innerHTML = `
+        const aiDiv = document.createElement('div');
+        aiDiv.className = 'post-ai';
+        aiDiv.innerHTML = `
       <div class="ai-container">
         <div class="ai-header">
           <div class="ai-icon">
@@ -27,11 +27,11 @@ function ChucklePostAI(AI_option) {
       </div>
     `;
 
-    targetElement.insertBefore(aiDiv, targetElement.firstChild);
+        targetElement.insertBefore(aiDiv, targetElement.firstChild);
 
-    // 添加样式
-    const style = document.createElement('style');
-    style.textContent = `
+        // 添加样式
+        const style = document.createElement('style');
+        style.textContent = `
       .post-ai {
         font-family: 'Noto Sans SC', sans-serif;
         margin-bottom: 20px;
@@ -86,205 +86,204 @@ function ChucklePostAI(AI_option) {
         100% { opacity: 0; }
       }
     `;
-    document.head.appendChild(style);
-  }
-
-  function removeExistingAIDiv() {
-    const existingAIDiv = document.querySelector(".post-ai");
-    if (existingAIDiv) {
-      existingAIDiv.parentElement.removeChild(existingAIDiv);
-    }
-  }
-
-  function findMainArticleContainer() {
-    const containers = document.querySelectorAll('#notion-article');
-    if (containers.length === 0) return null;
-    if (containers.length === 1) return containers[0];
-
-    // 如果有多个容器，选择内容最长的那个
-    let mainContainer = containers[0];
-    let maxLength = mainContainer.innerText.length;
-
-    for (let i = 1; i < containers.length; i++) {
-      const length = containers[i].innerText.length;
-      if (length > maxLength) {
-        maxLength = length;
-        mainContainer = containers[i];
-      }
+        document.head.appendChild(style);
     }
 
-    return mainContainer;
-  }
-
-  var chucklePostAI = {
-    getTitleAndContent: function() {
-      try {
-        const title = document.title;
-        const container = findMainArticleContainer();
-        if (!container) {
-          console.warn('ChucklePostAI：找不到主文章容器。');
-          return '';
+    function removeExistingAIDiv() {
+        const existingAIDiv = document.querySelector(".post-ai");
+        if (existingAIDiv) {
+            existingAIDiv.parentElement.removeChild(existingAIDiv);
         }
-        const paragraphs = container.getElementsByTagName('p');
-        const headings = container.querySelectorAll('h1, h2, h3, h4, h5');
-        let content = '';
+    }
 
-        for (let h of headings) {
-          content += h.innerText + ' ';
-        }
+    function findMainArticleContainer() {
+        const containers = document.querySelectorAll('#notion-article');
+        if (containers.length === 0) return null;
+        if (containers.length === 1) return containers[0];
 
-        for (let p of paragraphs) {
-          const filteredText = p.innerText.replace(/https?:\/\/[^\s]+/g, '');
-          content += filteredText;
-        }
+        // 如果有多个容器，选择内容最长的那个
+        let mainContainer = containers[0];
+        let maxLength = mainContainer.innerText.length;
 
-        const combinedText = title + ' ' + content;
-        let wordLimit = AI_option.wordLimit || 1000;
-        const truncatedText = combinedText.slice(0, wordLimit);
-        return truncatedText;
-      } catch (e) {
-        console.error('ChucklePostAI错误：获取文章内容失败', e);
-        return '';
-      }
-    },
-
-    fetchAISummary: async function(content) {
-      const url = window.location.href;
-      const title = document.title;
-      
-      try {
-        const response = await fetch('https://summary.qixing1217.top/api/summary?token=57X8Ht6R9a8GX548ggS', {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            content: content
-          })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          return data.summary;
-        } else {
-          throw new Error('Response not ok');
-        }
-      } catch (error) {
-        console.error('ChucklePostAI：请求失败', error);
-        return '获取文章摘要失败，请稍后再试。';
-      }
-    },
-
-    aiShowAnimation: function(text) {
-      const element = document.querySelector(".ai-explanation");
-      if (!element) return;
-
-      if (aiExecuted) return;
-
-      aiExecuted = true;
-      const typingDelay = 25;
-      const punctuationDelayMultiplier = 6;
-
-      element.innerHTML = "生成中..." + '<span class="blinking-cursor"></span>';
-
-      let animationRunning = true;
-      let currentIndex = 0;
-      let lastUpdateTime = performance.now();
-
-      const animate = () => {
-        if (currentIndex < text.length && animationRunning) {
-          const currentTime = performance.now();
-          const timeDiff = currentTime - lastUpdateTime;
-
-          const letter = text.slice(currentIndex, currentIndex + 1);
-          const isPunctuation = /[，。！、？,.!?]/.test(letter);
-          const delay = isPunctuation ? typingDelay * punctuationDelayMultiplier : typingDelay;
-
-          if (timeDiff >= delay) {
-            element.innerText = text.slice(0, currentIndex + 1);
-            lastUpdateTime = currentTime;
-            currentIndex++;
-
-            if (currentIndex < text.length) {
-              element.innerHTML = text.slice(0, currentIndex) + '<span class="blinking-cursor"></span>';
-            } else {
-              element.innerHTML = text;
-              aiExecuted = false;
-              observer.disconnect();
+        for (let i = 1; i < containers.length; i++) {
+            const length = containers[i].innerText.length;
+            if (length > maxLength) {
+                maxLength = length;
+                mainContainer = containers[i];
             }
-          }
-          requestAnimationFrame(animate);
         }
-      }
 
-      const observer = new IntersectionObserver((entries) => {
-        let isVisible = entries[0].isIntersecting;
-        animationRunning = isVisible;
-        if (animationRunning && currentIndex === 0) {
-          setTimeout(() => {
-            requestAnimationFrame(animate);
-          }, 200);
+        return mainContainer;
+    }
+
+    var chucklePostAI = {
+        getTitleAndContent: function () {
+            try {
+                const title = document.title;
+                const container = findMainArticleContainer();
+                if (!container) {
+                    console.warn('ChucklePostAI：找不到主文章容器。');
+                    return '';
+                }
+                const paragraphs = container.getElementsByTagName('p');
+                const headings = container.querySelectorAll('h1, h2, h3, h4, h5');
+                let content = '';
+
+                for (let h of headings) {
+                    content += h.innerText + ' ';
+                }
+
+                for (let p of paragraphs) {
+                    const filteredText = p.innerText.replace(/https?:\/\/[^\s]+/g, '');
+                    content += filteredText;
+                }
+
+                const combinedText = title + ' ' + content;
+                let wordLimit = AI_option.wordLimit || 1000;
+                const truncatedText = combinedText.slice(0, wordLimit);
+                return truncatedText;
+            } catch (e) {
+                console.error('ChucklePostAI错误：获取文章内容失败', e);
+                return '';
+            }
+        },
+
+        fetchAISummary: async function (content) {
+            const url = window.location.href;
+            const title = document.title;
+
+            try {
+                const response = await fetch('https://summary.qixing1217.top/api/summary?token=57X8Ht6R9a8GX548ggS', {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        content: content
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.summary;
+                } else {
+                    throw new Error('Response not ok');
+                }
+            } catch (error) {
+                console.error('ChucklePostAI：请求失败', error);
+                return '获取文章摘要失败，请稍后再试。';
+            }
+        },
+
+        aiShowAnimation: function (text) {
+            const element = document.querySelector(".ai-explanation");
+            if (!element) return;
+
+            if (aiExecuted) return;
+
+            aiExecuted = true;
+            const typingDelay = 25;
+            const punctuationDelayMultiplier = 6;
+
+            element.innerHTML = "生成中..." + '<span class="blinking-cursor"></span>';
+
+            let animationRunning = true;
+            let currentIndex = 0;
+            let lastUpdateTime = performance.now();
+
+            const animate = () => {
+                if (currentIndex < text.length && animationRunning) {
+                    const currentTime = performance.now();
+                    const timeDiff = currentTime - lastUpdateTime;
+
+                    const letter = text.slice(currentIndex, currentIndex + 1);
+                    const isPunctuation = /[，。！、？,.!?]/.test(letter);
+                    const delay = isPunctuation ? typingDelay * punctuationDelayMultiplier : typingDelay;
+
+                    if (timeDiff >= delay) {
+                        element.innerText = text.slice(0, currentIndex + 1);
+                        lastUpdateTime = currentTime;
+                        currentIndex++;
+
+                        if (currentIndex < text.length) {
+                            element.innerHTML = text.slice(0, currentIndex) + '<span class="blinking-cursor"></span>';
+                        } else {
+                            element.innerHTML = text;
+                            aiExecuted = false;
+                            observer.disconnect();
+                        }
+                    }
+                    requestAnimationFrame(animate);
+                }
+            }
+
+            const observer = new IntersectionObserver((entries) => {
+                let isVisible = entries[0].isIntersecting;
+                animationRunning = isVisible;
+                if (animationRunning && currentIndex === 0) {
+                    setTimeout(() => {
+                        requestAnimationFrame(animate);
+                    }, 200);
+                }
+            }, {threshold: 0});
+
+            let post_ai = document.querySelector('.post-ai');
+            observer.observe(post_ai);
+        },
+    }
+
+    function runChucklePostAI() {
+        if (isArticlePage()) {
+            const mainContainer = findMainArticleContainer();
+            if (mainContainer) {
+                insertAIDiv('#' + mainContainer.id);
+                const content = chucklePostAI.getTitleAndContent();
+                if (content) {
+                    console.log('ChucklePostAI本次提交的内容为：' + content);
+                }
+                chucklePostAI.fetchAISummary(content).then(summary => {
+                    chucklePostAI.aiShowAnimation(summary);
+                });
+            } else {
+                console.warn('ChucklePostAI：无法找到主文章容器');
+            }
         }
-      }, { threshold: 0 });
+    }
 
-      let post_ai = document.querySelector('.post-ai');
-      observer.observe(post_ai);
-    },
-  }
+    function initChucklePostAI() {
+        if (AI_option.pjax) {
+            runChucklePostAI();
+            document.addEventListener('pjax:complete', runChucklePostAI);
+        } else {
+            runChucklePostAI();
+        }
+    }
 
-  function runChucklePostAI() {
+    // 初始化时检查URL
     if (isArticlePage()) {
-      const mainContainer = findMainArticleContainer();
-      if (mainContainer) {
-        insertAIDiv('#' + mainContainer.id);
-        const content = chucklePostAI.getTitleAndContent();
-        if (content) {
-          console.log('ChucklePostAI本次提交的内容为：' + content);
+        initChucklePostAI();
+    }
+
+    function isArticlePage() {
+        const pathsToCheck = ['posts', 'article'];
+        return pathsToCheck.some(path => window.location.pathname.includes(path))
+    }
+
+    // 监听URL变化并自动刷新，忽略#hash避免目录跳转导致刷新的问题
+    let lastUrl = new URL(location.href).pathname + new URL(location.href).search;
+    new MutationObserver(() => {
+        const url = new URL(location.href).pathname + new URL(location.href).search;
+        if (url !== lastUrl) {
+            lastUrl = url;
+            if (isArticlePage()) {
+                location.reload(); // 页面刷新
+            }
         }
-        chucklePostAI.fetchAISummary(content).then(summary => {
-          chucklePostAI.aiShowAnimation(summary);
-        });
-      } else {
-        console.warn('ChucklePostAI：无法找到主文章容器');
-      }
-    }
-  }
-
-  function initChucklePostAI() {
-    if (AI_option.pjax) {
-      runChucklePostAI();
-      document.addEventListener('pjax:complete', runChucklePostAI);
-    } else {
-      runChucklePostAI();
-    }
-  }
-
-  // 初始化时检查URL
-  if (isArticlePage()) {
-    initChucklePostAI();
-  }
-
-  // 监听URL变化并自动刷新
-  let lastUrl = location.href;
-
-  function isArticlePage() {
-    const pathsToCheck = ['posts', 'article'];
-    return pathsToCheck.some(path => window.location.pathname.includes(path))
-  }
-
-  new MutationObserver(() => {
-  const url = location.href;
-    if (url !== lastUrl) {
-      lastUrl = url;
-      if (isArticlePage()) {
-        location.reload(); // 页面刷新
-      }
-    }
-  }).observe(document, {subtree: true, childList: true});
+    }).observe(document, {subtree: true, childList: true});
 }
 
 // 使用示例
 ChucklePostAI({
-  pjax: true,
-  wordLimit: 1000
+    pjax: true,
+    wordLimit: 1000
 });
