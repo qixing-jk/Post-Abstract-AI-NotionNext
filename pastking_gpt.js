@@ -264,23 +264,22 @@ function ChucklePostAI(AI_option) {
     initChucklePostAI();
   }
 
-  // 监听URL变化并自动刷新
-  let lastUrl = location.href;
-
-  function isArticlePage() {
-    const pathsToCheck = ['posts', 'article'];
-    return pathsToCheck.some(path => window.location.pathname.includes(path))
-  }
-
-  new MutationObserver(() => {
-  const url = location.href;
-    if (url !== lastUrl) {
-      lastUrl = url;
-      if (isArticlePage()) {
-        location.reload(); // 页面刷新
-      }
+    function isArticlePage() {
+        const pathsToCheck = ['posts', 'article'];
+        return pathsToCheck.some(path => window.location.pathname.includes(path))
     }
-  }).observe(document, {subtree: true, childList: true});
+
+    // 监听URL变化并自动刷新，忽略#hash避免目录跳转导致刷新的问题
+    let lastUrl = new URL(location.href).pathname + new URL(location.href).search;
+    new MutationObserver(() => {
+        const url = new URL(location.href).pathname + new URL(location.href).search;
+        if (url !== lastUrl) {
+            lastUrl = url;
+            if (isArticlePage()) {
+                location.reload(); // 页面刷新
+            }
+        }
+    }).observe(document, {subtree: true, childList: true});
 }
 
 // 使用示例
