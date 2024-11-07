@@ -97,23 +97,7 @@ function ChucklePostAI(AI_option) {
     }
 
     function findMainArticleContainer() {
-        const containers = document.querySelectorAll('#notion-article');
-        if (containers.length === 0) return null;
-        if (containers.length === 1) return containers[0];
-
-        // 如果有多个容器，选择内容最长的那个
-        let mainContainer = containers[0];
-        let maxLength = mainContainer.innerText.length;
-
-        for (let i = 1; i < containers.length; i++) {
-            const length = containers[i].innerText.length;
-            if (length > maxLength) {
-                maxLength = length;
-                mainContainer = containers[i];
-            }
-        }
-
-        return mainContainer;
+        return document.querySelector('#article-wrapper #notion-article');
     }
 
     var chucklePostAI = {
