@@ -96,25 +96,9 @@ function ChucklePostAI(AI_option) {
     }
   }
 
-  function findMainArticleContainer() {
-    const containers = document.querySelectorAll('#notion-article');
-    if (containers.length === 0) return null;
-    if (containers.length === 1) return containers[0];
-
-    // 如果有多个容器，选择内容最长的那个
-    let mainContainer = containers[0];
-    let maxLength = mainContainer.innerText.length;
-
-    for (let i = 1; i < containers.length; i++) {
-      const length = containers[i].innerText.length;
-      if (length > maxLength) {
-        maxLength = length;
-        mainContainer = containers[i];
-      }
+    function findMainArticleContainer() {
+        return document.querySelector('#article-wrapper #notion-article');
     }
-
-    return mainContainer;
-  }
 
   var chucklePostAI = {
     getTitleAndContent: function() {
@@ -151,7 +135,7 @@ function ChucklePostAI(AI_option) {
     fetchAISummary: async function(content) {
       const url = window.location.href;
       const title = document.title;
-      
+
       try {
         const response = await fetch('替换成你自己的后端接口', {
           method: "POST",
